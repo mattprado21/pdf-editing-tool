@@ -1,0 +1,63 @@
+version: "3.8"
+
+services:
+  php:
+    build:
+      context: .
+      dockerfile: ./docker/php/Dockerfile
+      args:
+        PHP_MODE: production
+    container_name: pdf_editing_tool_php
+    restart: unless-stopped
+    volumes:
+      - ./:/var/www/pdf-editing-tool
+    depends_on:
+      - mysql
+      - httpd
+      - mailhog
+    networks:
+      - pdf_editing_tool_network
+
+  httpd:
+    build:
+      context: .
+      dockerfile: ./docker/httpd/Dockerfile
+    container_name: pdf_editing_tool_httpd
+    restart: unless-stopped
+    volumes:
+      - ./:/var/www/pdf-editing-tool
+      - ./docker/httpd/vhosts.conf:/etc/apache2/sites-available/vhosts.conf
+    depends_on:
+      - mysql
+      - mailhog
+    networks:
+      - pdf_editing_tool_network
+
+  mysql:
+    image: mysql:8.0.39
+    container_name: pdf_editing_tool_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: pdf_editing_tool
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_USER: user
+      MYSQL_PASSWORD: user_password
+    volumes:
+      - pdf_editing_tool_database:/var/lib/mysql
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_general_ci
+    networks:
+      - pdf_editing_tool_network
+
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: pdf_editing_tool_mailhog
+    restart: unless-stopped
+    networks:
+      - pdf_editing_tool_network
+
+networks:
+  pdf_editing_tool_network:
+    driver: bridge
+
+volumes:
+  pdf_editing_tool_database:

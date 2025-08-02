@@ -1,0 +1,19 @@
+version: "3.8"
+
+services:
+  php:
+    build:
+      args:
+        PHP_MODE: development
+
+  httpd:
+    ports:
+      - 80:80
+
+  mysql:
+    ports:
+      - 3309:3306
+
+  mailhog:
+    ports:
+      - 8025:8025
