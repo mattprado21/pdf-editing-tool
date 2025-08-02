@@ -17,8 +17,8 @@
             </div>
           </div>
           <div class="flex items-center space-x-4">
-            <a href="#" class="text-gray-500 hover:text-gray-700 transition-colors">Documentation</a>
-            <a href="#" class="text-gray-500 hover:text-gray-700 transition-colors">Support</a>
+            <router-link to="/documentation" class="text-gray-500 hover:text-gray-700 transition-colors">Documentation</router-link>
+            <router-link to="/support" class="text-gray-500 hover:text-gray-700 transition-colors">Support</router-link>
           </div>
         </div>
       </div>
@@ -183,7 +183,7 @@
                     </div>
                     <div>
                       <span class="font-semibold text-gray-900">Zoom & Pan</span>
-                      <p class="text-sm text-gray-600 mt-1">Navigate your documents with precision</p>
+                      <p class="text-sm text-gray-600 mt-1">Navigate documents with precision (25% - 400%)</p>
                     </div>
                   </li>
                   <li class="flex items-start">
@@ -193,8 +193,8 @@
                       </svg>
                     </div>
                     <div>
-                      <span class="font-semibold text-gray-900">Grid & Rulers</span>
-                      <p class="text-sm text-gray-600 mt-1">Professional alignment tools</p>
+                      <span class="font-semibold text-gray-900">Professional Rulers</span>
+                      <p class="text-sm text-gray-600 mt-1">Inch-based measurements with detailed markings</p>
                     </div>
                   </li>
                   <li class="flex items-start">
@@ -204,8 +204,8 @@
                       </svg>
                     </div>
                     <div>
-                      <span class="font-semibold text-gray-900">Page Management</span>
-                      <p class="text-sm text-gray-600 mt-1">Add, delete, and organize pages</p>
+                      <span class="font-semibold text-gray-900">PDF Import & Export</span>
+                      <p class="text-sm text-gray-600 mt-1">Load existing PDFs and export with original content</p>
                     </div>
                   </li>
                   <li class="flex items-start">
@@ -215,8 +215,8 @@
                       </svg>
                     </div>
                     <div>
-                      <span class="font-semibold text-gray-900">Export & Save</span>
-                      <p class="text-sm text-gray-600 mt-1">Multiple format support</p>
+                      <span class="font-semibold text-gray-900">Page Size Support</span>
+                      <p class="text-sm text-gray-600 mt-1">A4, Letter, Legal, A3, A5, Tabloid, and Custom sizes</p>
                     </div>
                   </li>
                 </ul>
@@ -242,8 +242,8 @@
                       </svg>
                     </div>
                     <div>
-                      <span class="font-semibold text-gray-900">Drag & Drop</span>
-                      <p class="text-sm text-gray-600 mt-1">Intuitive element positioning</p>
+                      <span class="font-semibold text-gray-900">Text Elements</span>
+                      <p class="text-sm text-gray-600 mt-1">Rich text with fonts, colors, and styling</p>
                     </div>
                   </li>
                   <li class="flex items-start">
@@ -253,8 +253,8 @@
                       </svg>
                     </div>
                     <div>
-                      <span class="font-semibold text-gray-900">Resize & Rotate</span>
-                      <p class="text-sm text-gray-600 mt-1">Transform elements freely</p>
+                      <span class="font-semibold text-gray-900">Shapes & Images</span>
+                      <p class="text-sm text-gray-600 mt-1">Rectangles, circles, and image uploads</p>
                     </div>
                   </li>
                   <li class="flex items-start">
@@ -264,8 +264,8 @@
                       </svg>
                     </div>
                     <div>
-                      <span class="font-semibold text-gray-900">Style Controls</span>
-                      <p class="text-sm text-gray-600 mt-1">Colors, fonts, and effects</p>
+                      <span class="font-semibold text-gray-900">Digital Signatures</span>
+                      <p class="text-sm text-gray-600 mt-1">Draw and add custom signatures</p>
                     </div>
                   </li>
                   <li class="flex items-start">
@@ -275,8 +275,8 @@
                       </svg>
                     </div>
                     <div>
-                      <span class="font-semibold text-gray-900">Layer Management</span>
-                      <p class="text-sm text-gray-600 mt-1">Organize your elements</p>
+                      <span class="font-semibold text-gray-900">Copy & Paste</span>
+                      <p class="text-sm text-gray-600 mt-1">Ctrl+C and Ctrl+V for all elements</p>
                     </div>
                   </li>
                 </ul>
@@ -302,8 +302,8 @@
                       </svg>
                     </div>
                     <div>
-                      <span class="font-semibold text-gray-900">Interactive Elements</span>
-                      <p class="text-sm text-gray-600 mt-1">Hyperlinks and clickable areas</p>
+                      <span class="font-semibold text-gray-900">Undo & Redo</span>
+                      <p class="text-sm text-gray-600 mt-1">Full history tracking for all changes</p>
                     </div>
                   </li>
                   <li class="flex items-start">
@@ -313,8 +313,8 @@
                       </svg>
                     </div>
                     <div>
-                      <span class="font-semibold text-gray-900">Form Fields</span>
-                      <p class="text-sm text-gray-600 mt-1">Text inputs and checkboxes</p>
+                      <span class="font-semibold text-gray-900">Drawing Tools</span>
+                      <p class="text-sm text-gray-600 mt-1">Freehand drawing with custom colors</p>
                     </div>
                   </li>
                   <li class="flex items-start">
@@ -324,8 +324,8 @@
                       </svg>
                     </div>
                     <div>
-                      <span class="font-semibold text-gray-900">Security</span>
-                      <p class="text-sm text-gray-600 mt-1">Password protection</p>
+                      <span class="font-semibold text-gray-900">Export Options</span>
+                      <p class="text-sm text-gray-600 mt-1">Current page or all pages export</p>
                     </div>
                   </li>
                   <li class="flex items-start">
@@ -335,8 +335,8 @@
                       </svg>
                     </div>
                     <div>
-                      <span class="font-semibold text-gray-900">Version Control</span>
-                      <p class="text-sm text-gray-600 mt-1">Track your changes</p>
+                      <span class="font-semibold text-gray-900">Scrollable Canvas</span>
+                      <p class="text-sm text-gray-600 mt-1">Navigate large documents easily</p>
                     </div>
                   </li>
                 </ul>

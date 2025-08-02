@@ -792,7 +792,8 @@
                     <img 
                       :src="element.imageUrl" 
                       :alt="element.content || 'Image'"
-                      class="w-full h-full object-cover"
+                      class="w-full h-full object-contain"
+                      style="max-width: 100%; max-height: 100%;"
                     />
                   </div>
                   
@@ -1044,7 +1045,8 @@
                     <img 
                       :src="element.imageUrl" 
                       :alt="element.content || 'Image'"
-                      class="w-full h-full object-cover"
+                      class="w-full h-full object-contain"
+                      style="max-width: 100%; max-height: 100%;"
                     />
                   </div>
                   
@@ -1272,6 +1274,11 @@ const loadPdfFile = async (file) => {
     
     const arrayBuffer = await file.arrayBuffer()
     console.log('File read as ArrayBuffer, size:', arrayBuffer.byteLength)
+    
+    // Load PDF with pdf-lib for export functionality
+    const pdfDoc = await PDFDocument.load(arrayBuffer)
+    pdfDocument.value = pdfDoc
+    console.log('PDF-lib document loaded for export, pages:', pdfDoc.getPageCount())
     
     const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise
     console.log('PDF.js document loaded, pages:', pdf.numPages)
@@ -1765,6 +1772,19 @@ const exportToPDF = async () => {
     // If we're in edit mode and have a loaded PDF, use it as the base
     if (mode.value === 'edit' && pdfDocument.value) {
       pdfDoc = await PDFDocument.load(await pdfDocument.value.save())
+      
+      // If exporting current page only, remove other pages
+      if (exportMode.value === 'current') {
+        const selectedPageIndex = currentPageIndex.value
+        const totalPages = pdfDoc.getPageCount()
+        
+        // Remove pages from the end to avoid index shifting
+        for (let i = totalPages - 1; i >= 0; i--) {
+          if (i !== selectedPageIndex) {
+            pdfDoc.removePage(i)
+          }
+        }
+      }
     } else {
       // Create a new PDF document for create mode
       pdfDoc = await PDFDocument.create()
