@@ -1224,8 +1224,19 @@ import { useRouter, useRoute } from 'vue-router'
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib'
 import * as pdfjsLib from 'pdfjs-dist';
 
-// Set the worker source (served by Vite from public folder)
-pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdf.worker.js';
+// Initialize PDF.js worker to match the installed library version
+try {
+  const workerUrl = new URL('pdfjs-dist/build/pdf.worker.min.mjs', import.meta.url)
+  pdfjsLib.GlobalWorkerOptions.workerPort = new Worker(workerUrl, { type: 'module' })
+} catch (e1) {
+  try {
+    const workerUrl = new URL('pdfjs-dist/build/pdf.worker.mjs', import.meta.url)
+    pdfjsLib.GlobalWorkerOptions.workerPort = new Worker(workerUrl, { type: 'module' })
+  } catch (e2) {
+    // Final fallback to static path if bundling is unavailable
+    pdfjsLib.GlobalWorkerOptions.workerSrc = (import.meta.env.BASE_URL || '/') + 'pdf.worker.js'
+  }
+}
 
 import {
   ArrowLeftIcon,
