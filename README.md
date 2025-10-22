@@ -126,54 +126,103 @@ Users can choose to:
 - Storing saved projects
 - Exporting from JSON to PDF server-side
 
-## 🚀 Getting Started
+## 🚀 Installation
 
-### Prerequisites
-- Node.js (v16 or higher)
-- PHP 8.1+
-- Composer
-- Laravel
-
-### Installation
-
-1. **Clone the repository**
+### Clone via SSH
+1. Set up SSH (and your Personal Access Token if required by your Git provider).
+2. Clone the repository using SSH and change to the project directory:
    ```bash
-   git clone <repository-url>
+   git clone git@your-git-host:your-org/pdf-editing-tool.git
    cd pdf-editing-tool
    ```
+3. (Optional) Switch to the main branch and update it:
+   ```bash
+   git checkout main
+   git pull origin main
+   ```
 
-2. **Install PHP dependencies**
+### Docker (recommended)
+- Prerequisites: docker, docker-compose, vi, node, npm (the Makefile checks these)
+
+1. Run the setup target (this will guide you through config and bring up containers):
+   ```bash
+   make setup
+   ```
+   During this process, you will be prompted to edit `.env` and `docker-compose.override.yml` in `vi`.
+   - To retain defaults and exit the editor: type `:q` and press Enter.
+   - If you make changes and want to save and exit: type `:wq` and press Enter.
+   - If exiting multiple editors at once: `:qa`.
+   Note: If you want to use specific ports, update them in your `.env` (and `docker-compose.override.yml` if needed).
+
+2. Build frontend assets on your host (volume-mounted into the container):
+   ```bash
+   npm ci
+   npm run build
+   ```
+
+3. Access the app:
+   - App: `http://localhost`
+
+Common Docker tasks:
+```bash
+# Rebuild containers after config changes
+make update-setup
+
+# Reset DB and seed
+make migrate-fresh
+
+# Clear Laravel caches
+make clear-cache
+
+# Shell into the PHP container
+make bash
+```
+
+### Ubuntu (native install)
+- Prerequisites: PHP 8.1+, Composer, Node.js 18+ (or 16+), npm, a database (MySQL 8 or SQLite)
+
+1. Install PHP dependencies:
    ```bash
    composer install
    ```
 
-3. **Install Node.js dependencies**
+2. Install Node dependencies:
    ```bash
-   npm install
+   npm ci
    ```
 
-4. **Set up environment**
+3. Environment setup:
    ```bash
    cp .env.example .env
    php artisan key:generate
+   # Configure DB settings in .env (MySQL or SQLite)
    ```
 
-5. **Run database migrations**
+4. Database migrations:
    ```bash
    php artisan migrate
    ```
 
-6. **Start the development server**
-   ```bash
-   # Terminal 1: Start Laravel server
-   php artisan serve
-   
-   # Terminal 2: Start Vite dev server
-   npm run dev
-   ```
+5. Run locally (choose one):
+   - Development (hot reload):
+     ```bash
+     # Terminal 2
+     npm run dev
+     ```
+   - Production-like (build assets):
+     ```bash
+     npm run build
+     php artisan serve
+     ```
 
-7. **Open your browser**
-   Navigate to `http://localhost:8000`
+6. Open your browser at `http://localhost`.
+
+### Notes
+- PDF.js worker: this app expects `/pdf.worker.js`. Ensure `public/pdf.worker.js` exists. If missing, copy it:
+  ```bash
+  cp node_modules/pdfjs-dist/build/pdf.worker.js public/pdf.worker.js
+  ```
+- Do not commit `public/build` to Git. Build assets in CI/deploy or ship a release artifact that includes it if your host cannot run Node.
 
 ## 📁 Project Structure
 

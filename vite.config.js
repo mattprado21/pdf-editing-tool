@@ -19,4 +19,18 @@ export default defineConfig({
             'pdfjs-dist/build/pdf.worker.min.js': path.resolve(__dirname, 'node_modules/pdfjs-dist/build/pdf.worker.js'),
         },
     },
+    build: {
+        // Raise the threshold a bit to reflect intentional code-splitting below
+        chunkSizeWarningLimit: 1200,
+        rollupOptions: {
+            output: {
+                // Split heavy libs so the main app chunk stays smaller
+                manualChunks: {
+                    'vendor-vue': ['vue', 'vue-router'],
+                    'pdf-vendors': ['pdf-lib', 'pdfjs-dist'],
+                    'icons': ['@heroicons/vue'],
+                },
+            },
+        },
+    },
 });

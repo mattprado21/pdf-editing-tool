@@ -746,8 +746,9 @@
                 <!-- Element Content -->
                 <div class="w-full h-full">
                   <!-- Text Element -->
-                  <div v-if="element.type === 'text'" class="w-full h-full flex items-center justify-center">
+                  <div v-if="element.type === 'text'" class="w-full h-full flex items-center justify-center" @dblclick.stop="startTextEditing(element)">
                     <div 
+                      v-if="!(isEditingText && editingTextId === element.id)"
                       class="w-full h-full flex items-center justify-center p-2"
                       :style="{
                         color: element.color || '#000000',
@@ -756,13 +757,21 @@
                         fontFamily: element.fontFamily || 'Arial',
                         fontWeight: element.fontWeight || 'normal',
                         fontStyle: element.fontStyle || 'normal',
-                        textDecoration: element.textDecoration || 'none',
-                        border: element.borderWidth ? `${element.borderWidth}px solid ${element.borderColor || '#000000'}` : 'none',
-                        borderRadius: element.type === 'circle' ? '50%' : '0px'
+                        textDecoration: element.textDecoration || 'none'
                       }"
                     >
                       {{ element.content || 'Text' }}
                     </div>
+                    <textarea
+                      v-else
+                      ref="editingTextarea"
+                      :value="element.content || ''"
+                      @input="handleTextChange"
+                      @blur="stopTextEditing"
+                      @mousedown.stop
+                      class="w-full h-full p-2 bg-transparent outline-none border-0 resize-none"
+                      autofocus
+                    ></textarea>
                   </div>
                   
                   <!-- Rectangle Element -->
@@ -999,8 +1008,9 @@
                 <!-- Element Content -->
                 <div class="w-full h-full">
                   <!-- Text Element -->
-                  <div v-if="element.type === 'text'" class="w-full h-full flex items-center justify-center">
+                  <div v-if="element.type === 'text'" class="w-full h-full flex items-center justify-center" @dblclick.stop="startTextEditing(element)">
                     <div 
+                      v-if="!(isEditingText && editingTextId === element.id)"
                       class="w-full h-full flex items-center justify-center p-2"
                       :style="{
                         color: element.color || '#000000',
@@ -1009,13 +1019,21 @@
                         fontFamily: element.fontFamily || 'Arial',
                         fontWeight: element.fontWeight || 'normal',
                         fontStyle: element.fontStyle || 'normal',
-                        textDecoration: element.textDecoration || 'none',
-                        border: element.borderWidth ? `${element.borderWidth}px solid ${element.borderColor || '#000000'}` : 'none',
-                        borderRadius: element.type === 'circle' ? '50%' : '0px'
+                        textDecoration: element.textDecoration || 'none'
                       }"
                     >
                       {{ element.content || 'Text' }}
                     </div>
+                    <textarea
+                      v-else
+                      ref="editingTextarea"
+                      :value="element.content || ''"
+                      @input="handleTextChange"
+                      @blur="stopTextEditing"
+                      @mousedown.stop
+                      class="w-full h-full p-2 bg-transparent outline-none border-0 resize-none"
+                      autofocus
+                    ></textarea>
                   </div>
                   
                   <!-- Rectangle Element -->
@@ -1498,7 +1516,7 @@ const addElement = (type) => {
     color: '#000000',
     backgroundColor: type === 'rectangle' || type === 'circle' ? '#ffffff' : undefined,
     borderColor: '#000000',
-    borderWidth: 1,
+    borderWidth: 0,
     rotation: 0,
     zIndex: Math.max(...pages.value[currentPageIndex.value].elements.map(e => e.zIndex), 0) + 1
   }
