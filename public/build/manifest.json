@@ -3,8 +3,8 @@
     "file": "assets/icons-l0sNRNKZ.js",
     "name": "icons"
   },
-  "_pdf-vendors-owwIbD74.js": {
-    "file": "assets/pdf-vendors-owwIbD74.js",
+  "_pdf-vendors-Cw59xs2R.js": {
+    "file": "assets/pdf-vendors-Cw59xs2R.js",
     "name": "pdf-vendors"
   },
   "_vendor-vue-C21E-i-l.js": {
@@ -20,22 +20,22 @@
     "src": "node_modules/pdfjs-dist/build/pdf.worker.mjs"
   },
   "resources/css/app.css": {
-    "file": "assets/app-DgAUQlMG.css",
+    "file": "assets/app-DZJuL-KR.css",
     "src": "resources/css/app.css",
     "isEntry": true
   },
   "resources/js/app.js": {
-    "file": "assets/app-1TkqHZ20.js",
+    "file": "assets/app-C9L71UDK.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
     "imports": [
       "_vendor-vue-C21E-i-l.js",
-      "_pdf-vendors-owwIbD74.js"
+      "_pdf-vendors-Cw59xs2R.js"
     ],
     "css": [
       "assets/app-BhacnGps.css",
-      "assets/app-DgAUQlMG.css"
+      "assets/app-DZJuL-KR.css"
     ],
     "assets": [
       "assets/pdf.worker.min-qwK7q_zL.mjs",

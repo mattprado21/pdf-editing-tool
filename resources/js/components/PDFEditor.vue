@@ -138,6 +138,17 @@
               >
                 <Square3Stack3DIcon class="w-5 h-5" />
               </button>
+              <!-- Text Overlay Toggle -->
+              <button 
+                @click="showTextOverlay = !showTextOverlay"
+                :class="[
+                  'p-2 rounded-lg transition-colors',
+                  showTextOverlay ? 'bg-blue-100 text-blue-600' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                ]"
+                title="Toggle Text Overlay"
+              >
+                <DocumentTextIcon class="w-5 h-5" />
+              </button>
             </div>
 
             <div class="w-px h-6 bg-gray-300"></div>
@@ -684,6 +695,24 @@
                   backgroundSize: '20px 20px'
                 }"
               ></div>
+
+              <!-- Extracted Text Overlay -->
+              <div v-if="showTextOverlay && !isLoadingPdf" class="absolute inset-0 pointer-events-auto" :style="{ zIndex: 9999 }">
+                <div
+                  v-for="run in (textRunsByPage[currentPageIndex] || [])"
+                  :key="run.id"
+                  class="absolute cursor-text"
+                  :style="{
+                    left: `${run.x * (zoom / 100)}px`,
+                    top: `${(run.y - run.height) * (zoom / 100)}px`,
+                    width: `${run.width * (zoom / 100)}px`,
+                    height: `${run.height * (zoom / 100)}px`,
+                    backgroundColor: 'rgba(255, 255, 0, 0.2)'
+                  }"
+                  @click.stop="editTextRun(run)"
+                  title="Click to edit text"
+                ></div>
+              </div>
 
               <!-- Elements -->
               <div 
@@ -1294,6 +1323,10 @@ const uploadedFile = computed(() => {
 const pdfDocument = ref(null)
 const pdfPages = ref([])
 const isLoadingPdf = ref(false)
+const showTextOverlay = ref(false)
+const textRunsByPage = ref({})
+const isEditingPdfText = ref(false)
+const editingRun = ref(null)
 
 // Load PDF function
 const loadPdfFile = async (file) => {
@@ -1313,6 +1346,7 @@ const loadPdfFile = async (file) => {
     console.log('PDF.js document loaded, pages:', pdf.numPages)
     
     const newPages = []
+    const extractedTextRuns = {}
     
     for (let i = 0; i < pdf.numPages; i++) {
       const page = await pdf.getPage(i + 1)
@@ -1341,11 +1375,33 @@ const loadPdfFile = async (file) => {
         height: viewport.height,
         pdfPageIndex: i,
       })
+
+      // Extract text runs for overlay (using pdf.js)
+      const textContent = await page.getTextContent()
+      const pageRuns = textContent.items.map((item, idx) => {
+        const tx = pdfjsLib.Util.transform(viewport.transform, item.transform)
+        const x = tx[4]
+        const y = tx[5]
+        const fontSize = Math.hypot(tx[0], tx[1])
+        const width = item.width
+        const height = fontSize
+        return {
+          id: `${i + 1}-${idx}`,
+          str: item.str,
+          x,
+          y,
+          width,
+          height,
+          fontSize,
+        }
+      })
+      extractedTextRuns[i] = pageRuns
     }
     
     console.log('Created pages array:', newPages.length, 'pages')
     pages.value = newPages
     pdfPages.value = newPages
+    textRunsByPage.value = extractedTextRuns
     
     // Ensure currentPageIndex is valid
     if (currentPageIndex.value >= newPages.length) {
@@ -1713,6 +1769,37 @@ const pasteElement = () => {
   }
 }
 
+// PDF text editing (overlay + regenerate page content)
+const editTextRun = (run) => {
+  isEditingPdfText.value = true
+  editingRun.value = { ...run }
+  // Add a temporary text element positioned over the run for editing
+  const newElement = {
+    id: `edit-${Date.now()}`,
+    type: 'text',
+    x: run.x,
+    y: run.y - run.height,
+    width: run.width,
+    height: run.height,
+    content: run.str,
+    fontSize: run.fontSize || 16,
+    fontFamily: 'Helvetica',
+    fontWeight: 'normal',
+    fontStyle: 'normal',
+    textDecoration: 'none',
+    color: '#000000',
+    rotation: 0,
+    zIndex: Math.max(...pages.value[currentPageIndex.value].elements.map(e => e.zIndex), 0) + 10
+  }
+  const updatedPages = [...pages.value]
+  updatedPages[currentPageIndex.value].elements.push(newElement)
+  pages.value = updatedPages
+  addToHistory(updatedPages)
+  selectedElement.value = newElement
+  // Enable existing inline editing UX
+  startTextEditing(newElement)
+}
+
 const duplicateElement = (element) => {
   const newElement = {
     ...element,
@@ -1929,6 +2016,22 @@ const exportToPDF = async () => {
         // Note: Rotation is handled by the rotate parameter in each drawing function
         
         if (type === 'text' && content) {
+          // If showTextOverlay is on and this text overlaps an existing run, draw a white cover first
+          if (showTextOverlay.value && textRunsByPage.value && textRunsByPage.value[pageIndex]) {
+            const overlaps = textRunsByPage.value[pageIndex].some(run => {
+              const rx = run.x, ry = pdfPageHeight - run.y
+              return !(x + width < rx || x > rx + run.width || (pdfPageHeight - y - height) + height < ry || (pdfPageHeight - y - height) > ry + run.height)
+            })
+            if (overlaps) {
+              page.drawRectangle({
+                x: x,
+                y: pdfPageHeight - y - height,
+                width: width,
+                height: height,
+                color: rgb(1, 1, 1)
+              })
+            }
+          }
           // Select appropriate font based on family and style
           const selectedFont = getFont(fontFamily || 'Arial', fontWeight || 'normal', fontStyle || 'normal')
           
