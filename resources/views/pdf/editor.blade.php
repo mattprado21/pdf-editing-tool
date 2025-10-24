@@ -38,6 +38,8 @@
         licenseKey: "demo:1761125977885:6037fde403000000007c5f66550268d9f8309b95b57bf7ba5ed99bb3c2",       // comment out to test content-edit in demo mode
       }, document.getElementById('viewer'));
 
+      instance.UI.setLanguage('ja');
+
       const { UI, Core } = instance;
       const { PDFNet, documentViewer } = Core;
 

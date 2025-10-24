@@ -3,8 +3,8 @@
     "file": "assets/icons-l0sNRNKZ.js",
     "name": "icons"
   },
-  "_pdf-vendors-Cw59xs2R.js": {
-    "file": "assets/pdf-vendors-Cw59xs2R.js",
+  "_pdf-vendors-D3OWpJ28.js": {
+    "file": "assets/pdf-vendors-D3OWpJ28.js",
     "name": "pdf-vendors"
   },
   "_vendor-vue-C21E-i-l.js": {
@@ -20,26 +20,39 @@
     "src": "node_modules/pdfjs-dist/build/pdf.worker.mjs"
   },
   "resources/css/app.css": {
-    "file": "assets/app-DZJuL-KR.css",
+    "file": "assets/app-DDghj-3K.css",
     "src": "resources/css/app.css",
     "isEntry": true
   },
   "resources/js/app.js": {
-    "file": "assets/app-C9L71UDK.js",
+    "file": "assets/app-BQjyt6IC.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
     "imports": [
       "_vendor-vue-C21E-i-l.js",
-      "_pdf-vendors-Cw59xs2R.js"
+      "_pdf-vendors-D3OWpJ28.js"
     ],
     "css": [
       "assets/app-BhacnGps.css",
-      "assets/app-DZJuL-KR.css"
+      "assets/app-DDghj-3K.css"
     ],
     "assets": [
       "assets/pdf.worker.min-qwK7q_zL.mjs",
       "assets/pdf.worker-9aISQa3R.mjs"
+    ]
+  },
+  "resources/js/fabric-editor.js": {
+    "file": "assets/fabric-editor-Rc5HJ5dY.js",
+    "name": "fabric-editor",
+    "src": "resources/js/fabric-editor.js",
+    "isEntry": true,
+    "imports": [
+      "_vendor-vue-C21E-i-l.js",
+      "_pdf-vendors-D3OWpJ28.js"
+    ],
+    "css": [
+      "assets/fabric-editor-DK8VX77j.css"
     ]
   }
 }

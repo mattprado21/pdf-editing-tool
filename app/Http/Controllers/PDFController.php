@@ -14,6 +14,13 @@ class PdfController extends Controller
         return view('pdf.editor', ['file' => $file]);
     }
 
+    public function fabricEditor(Request $request)
+    {
+        // Basic Fabric.js + pdfjs-dist editor entrypoint
+        $file = $request->query('file', '/storage/pdfs/sample.pdf');
+        return view('pdf.fabric-editor', ['file' => $file]);
+    }
+
     public function upload(Request $request)
     {
         $request->validate([

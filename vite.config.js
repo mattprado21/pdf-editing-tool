@@ -7,7 +7,7 @@ import path from 'path';
 export default defineConfig({
     plugins: [
         laravel({
-            input: ['resources/css/app.css', 'resources/js/app.js'],
+            input: ['resources/css/app.css', 'resources/js/app.js', 'resources/js/fabric-editor.js'],
             refresh: true,
         }),
         vue(),
@@ -16,7 +16,7 @@ export default defineConfig({
     resolve: {
         alias: {
             '@': '/resources/js',
-            'pdfjs-dist/build/pdf.worker.min.js': path.resolve(__dirname, 'node_modules/pdfjs-dist/build/pdf.worker.js'),
+            'resources/js/fabric-editor.js': path.resolve(__dirname, 'resources/js/fabric-editor.js'),
         },
     },
     build: {

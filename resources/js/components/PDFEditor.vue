@@ -783,7 +783,7 @@
                         color: element.color || '#000000',
                         backgroundColor: element.backgroundColor || 'transparent',
                         fontSize: `${element.fontSize || 16}px`,
-                        fontFamily: element.fontFamily || 'Arial',
+                        fontFamily: element.fontFamily || 'Noto Sans JP, Arial, Helvetica, sans-serif',
                         fontWeight: element.fontWeight || 'normal',
                         fontStyle: element.fontStyle || 'normal',
                         textDecoration: element.textDecoration || 'none'
@@ -1045,7 +1045,7 @@
                         color: element.color || '#000000',
                         backgroundColor: element.backgroundColor || 'transparent',
                         fontSize: `${element.fontSize || 16}px`,
-                        fontFamily: element.fontFamily || 'Arial',
+                        fontFamily: element.fontFamily || 'Noto Sans JP, Arial, Helvetica, sans-serif',
                         fontWeight: element.fontWeight || 'normal',
                         fontStyle: element.fontStyle || 'normal',
                         textDecoration: element.textDecoration || 'none'
@@ -1251,6 +1251,7 @@
 import { ref, computed, onMounted, watch, onUnmounted, nextTick } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib'
+import fontkit from '@pdf-lib/fontkit'
 import * as pdfjsLib from 'pdfjs-dist';
 
 // Initialize PDF.js worker to match the installed library version
@@ -1342,7 +1343,12 @@ const loadPdfFile = async (file) => {
     pdfDocument.value = pdfDoc
     console.log('PDF-lib document loaded for export, pages:', pdfDoc.getPageCount())
     
-    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise
+    const pdf = await pdfjsLib.getDocument({
+      data: arrayBuffer,
+      cMapUrl: '/cmaps/',
+      cMapPacked: true,
+      standardFontDataUrl: '/standard_fonts/'
+    }).promise
     console.log('PDF.js document loaded, pages:', pdf.numPages)
     
     const newPages = []
@@ -1906,6 +1912,19 @@ const exportToPDF = async () => {
       pdfDoc = await PDFDocument.create()
     }
     
+    // Register fontkit to allow embedding custom TTF/OTF fonts (needed for CJK)
+    pdfDoc.registerFontkit(fontkit)
+
+    // Attempt to load a CJK-capable font (NotoSansJP)
+    let notoSansJP = null
+    try {
+      const res = await fetch('/fonts/NotoSansJP-Regular.ttf')
+      if (res && res.ok) {
+        const bytes = await res.arrayBuffer()
+        notoSansJP = await pdfDoc.embedFont(bytes, { subset: true })
+      }
+    } catch (_) {}
+
     // Embed fonts for different font families
     const fonts = {
       // Helvetica family
@@ -1937,10 +1956,17 @@ const exportToPDF = async () => {
         boldItalic: await pdfDoc.embedFont(StandardFonts.HelveticaBoldOblique)
       }
     }
+
+    // Helper to detect CJK characters
+    const containsCJK = (text) => /[\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff]/.test(text || '')
     
     // Default to Helvetica for unsupported fonts
-    const getFont = (fontFamily, fontWeight, fontStyle) => {
+    const getFont = (fontFamily, fontWeight, fontStyle, textContent) => {
       try {
+        // Prefer CJK font when needed and available
+        if (notoSansJP && containsCJK(textContent)) {
+          return notoSansJP
+        }
         const family = fonts[fontFamily] || fonts['Helvetica']
         
         let selectedFont
@@ -2018,11 +2044,13 @@ const exportToPDF = async () => {
         if (type === 'text' && content) {
           // If showTextOverlay is on and this text overlaps an existing run, draw a white cover first
           if (showTextOverlay.value && textRunsByPage.value && textRunsByPage.value[pageIndex]) {
+            const needsCJK = containsCJK(content)
             const overlaps = textRunsByPage.value[pageIndex].some(run => {
               const rx = run.x, ry = pdfPageHeight - run.y
               return !(x + width < rx || x > rx + run.width || (pdfPageHeight - y - height) + height < ry || (pdfPageHeight - y - height) > ry + run.height)
             })
-            if (overlaps) {
+            // Only white-out if we can re-render the text (avoid erasing CJK without font)
+            if (overlaps && (!needsCJK || (needsCJK && notoSansJP))) {
               page.drawRectangle({
                 x: x,
                 y: pdfPageHeight - y - height,
@@ -2033,7 +2061,7 @@ const exportToPDF = async () => {
             }
           }
           // Select appropriate font based on family and style
-          const selectedFont = getFont(fontFamily || 'Arial', fontWeight || 'normal', fontStyle || 'normal')
+          const selectedFont = getFont(fontFamily || 'Arial', fontWeight || 'normal', fontStyle || 'normal', content)
           
           console.log('Text rendering:', {
             content: content,
