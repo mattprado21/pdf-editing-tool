@@ -10,7 +10,7 @@ class PdfController extends Controller
     public function editor(Request $request)
     {
         // Load a default doc or pass ?file=/storage/pdfs/sample.pdf
-        $file = $request->query('file', '/storage/pdfs/sample.pdf');
+        $file = $request->query('file', '');
         return view('pdf.editor', ['file' => $file]);
     }
 

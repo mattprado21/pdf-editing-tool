@@ -12,48 +12,58 @@
 </head>
 <body>
   <div class="toolbar">
-    <form id="uploadForm" style="display:inline-block">
-      <input type="file" id="pdfFile" accept="application/pdf" />
-      <button type="submit">Upload & Open</button>
-    </form>
-    <button id="enableEdit">Enable Content Edit</button>
-    <button id="extractText">Extract Text (console)</button>
-    <button id="savePdf">Save Edited PDF</button>
+    <input type="file" id="pdfFile" accept="application/pdf" style="display:none" />
+    <button id="chooseUpload" style="padding:6px 10px;border:1px solid #ccc;border-radius:6px;background:#f8f9fa;cursor:pointer">Choose & Upload</button>
+    <button id="extractText" style="padding:6px 10px;border:1px solid #ccc;border-radius:6px;background:#f8f9fa;cursor:pointer">Extract Text</button>
+    <button id="downloadPdf" style="padding:6px 10px;border:1px solid #ccc;border-radius:6px;background:#10b981;color:white;cursor:pointer">Download PDF</button>
   </div>
   <div id="viewer"></div>
+
+  <!-- Simple modal for extracted text -->
+  <div id="textModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);align-items:center;justify-content:center;">
+    <div style="background:#fff;max-width:800px;width:90%;max-height:80vh;border-radius:8px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,0.2);">
+      <div style="padding:10px 14px;border-bottom:1px solid #eee;display:flex;align-items:center;justify-content:space-between;">
+        <strong>Extracted Text</strong>
+        <div>
+          <button id="downloadTextBtn" style="margin-right:8px;padding:6px 10px;border:1px solid #ccc;border-radius:6px;background:#f8f9fa;cursor:pointer">Download .txt</button>
+          <button id="closeTextModal" style="padding:6px 10px;border:1px solid #ccc;border-radius:6px;background:#f8f9fa;cursor:pointer">Close</button>
+        </div>
+      </div>
+      <textarea id="extractedTextArea" readonly style="width:100%;height:60vh;padding:12px;border:0;outline:none;resize:none"></textarea>
+    </div>
+  </div>
 
   {{-- If you used manual install, serve from /webviewer/lib/webviewer.min.js --}}
   <script src="/webviewer/lib/webviewer.min.js"></script>
   <script>
     (async () => {
-      const initialDoc = "{{ $file }}"; // e.g. /storage/sample.pdf
+      const initialDoc = "{{ $file }}"; // optional
 
       // If you installed via NPM and are bundling, you’d import WebViewer from '@pdftron/webviewer'
       // For manual/NPM-copied lib, just use the global WebViewer in window.
 
-      const instance = await WebViewer({
-        path: '/webviewer/lib',          // where lib/ lives (manual/NPM-copied)
-        initialDoc,                      // a URL served by Laravel
-        fullAPI: true,                    // needed for extraction APIs
-        licenseKey: "demo:1761125977885:6037fde403000000007c5f66550268d9f8309b95b57bf7ba5ed99bb3c2",       // comment out to test content-edit in demo mode
-      }, document.getElementById('viewer'));
+      const viewerConfig = {
+        path: '/webviewer/lib',
+        fullAPI: true,
+        licenseKey: "demo:1761125977885:6037fde403000000007c5f66550268d9f8309b95b57bf7ba5ed99bb3c2",
+      };
+      if (initialDoc) viewerConfig.initialDoc = initialDoc;
+      const instance = await WebViewer(viewerConfig, document.getElementById('viewer'));
 
-      instance.UI.setLanguage('ja');
+      instance.UI.setLanguage('en');
 
       const { UI, Core } = instance;
       const { PDFNet, documentViewer } = Core;
 
-      // (1) Enable Content Edit (text & image)
-      // Content Edit is an add-on; in demo mode it works if license key is commented out. :contentReference[oaicite:3]{index=3}
-      document.getElementById('enableEdit').addEventListener('click', () => {
-        UI.enableFeatures(['ContentEdit']); // toggles the text/image WYSIWYG editor
-      });
+      // Always enable Content Edit on load (if available in your build/license)
+      try { UI.enableFeatures(['ContentEdit']); } catch (e) { /* ignore if unavailable */ }
 
-      // (2) Upload and open
-      const uploadForm = document.getElementById('uploadForm');
-      uploadForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const f = document.getElementById('pdfFile').files[0];
+      // Choose & Upload flow (single button opens picker then uploads)
+      const chooseBtn = document.getElementById('chooseUpload');
+      const fileInput = document.getElementById('pdfFile');
+      chooseBtn.addEventListener('click', () => fileInput.click());
+      fileInput.addEventListener('change', async () => {
+        const f = fileInput.files[0];
         if (!f) return;
         const fd = new FormData();
         fd.append('pdf', f);
@@ -64,14 +74,29 @@
         }
       });
 
-      // (3) Extract TEXT (logs to console)
-      // Requires fullAPI; Apryse has text extraction guide. :contentReference[oaicite:4]{index=4}
+      // Extract TEXT → show in modal and allow download
+      const textModal = document.getElementById('textModal');
+      const textArea = document.getElementById('extractedTextArea');
+      const closeModal = document.getElementById('closeTextModal');
+      const downloadBtn = document.getElementById('downloadTextBtn');
+      closeModal.addEventListener('click', () => { textModal.style.display = 'none'; });
+      downloadBtn.addEventListener('click', () => {
+        const blob = new Blob([textArea.value || ''], { type: 'text/plain;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'extracted.txt';
+        a.click();
+        URL.revokeObjectURL(url);
+      });
+
       document.getElementById('extractText').addEventListener('click', async () => {
         await PDFNet.initialize();
         const doc = await documentViewer.getDocument().getPDFDoc();
         const reader = await PDFNet.ElementReader.create();
         const itr = await doc.getPageIterator(1);
         let pageNum = 1;
+        let all = '';
         for (; await itr.hasNext(); await itr.next(), pageNum++) {
           const page = await itr.current();
           await reader.beginOnPage(page);
@@ -82,37 +107,29 @@
             }
           }
           await reader.end();
-          console.log(`Page ${pageNum}:`, text);
+          all += `\n\n--- Page ${pageNum} ---\n` + text;
         }
+        textArea.value = all.trim();
+        textModal.style.display = 'flex';
       });
 
-      // (4) Save edited PDF back to Laravel
-      document.getElementById('savePdf').addEventListener('click', async () => {
+      // (4a) Download edited PDF locally
+      document.getElementById('downloadPdf').addEventListener('click', async () => {
         const doc = documentViewer.getDocument();
-        const xfdfString = await Core.annotationManager.exportAnnotations(); // optional: keep annots
-        const data = await doc.getFileData({ xfdfString }); // Uint8Array
+        const xfdfString = await Core.annotationManager.exportAnnotations();
+        const data = await doc.getFileData({ xfdfString });
         const blob = new Blob([new Uint8Array(data)], { type: 'application/pdf' });
-
-        // Convert to base64 for simple POST
-        const b64 = await new Promise((resolve) => {
-          const fr = new FileReader();
-          fr.onload = () => resolve(fr.result);
-          fr.readAsDataURL(blob);
-        });
-
-        const filename = (doc?.filename || 'edited.pdf');
-        const res = await fetch('/pdf/apryse/save', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
-          body: JSON.stringify({ filename, blob: b64 })
-        });
-        const json = await res.json();
-        if (json.ok) {
-          alert('Saved: ' + json.url);
-          // Optionally redirect or open:
-          // window.open(json.url, '_blank');
-        }
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = (doc?.filename ? `edited_${doc.filename}` : 'edited.pdf');
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
       });
+
+      // Removed server save; download-only
     })();
   </script>
 </body>
