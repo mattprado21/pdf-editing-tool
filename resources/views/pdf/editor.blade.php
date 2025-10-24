@@ -3,7 +3,7 @@
 <html>
 <head>
   <meta charset="utf-8" />
-  <title>PDF Editor</title>
+  <title>PDFエディタ</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     html, body, #viewer { height: 100%; margin: 0; }
@@ -13,9 +13,9 @@
 <body>
   <div class="toolbar">
     <input type="file" id="pdfFile" accept="application/pdf" style="display:none" />
-    <button id="chooseUpload" style="padding:6px 10px;border:1px solid #ccc;border-radius:6px;background:#f8f9fa;cursor:pointer">Choose & Upload</button>
-    <button id="extractText" style="padding:6px 10px;border:1px solid #ccc;border-radius:6px;background:#f8f9fa;cursor:pointer">Extract Text</button>
-    <button id="downloadPdf" style="padding:6px 10px;border:1px solid #ccc;border-radius:6px;background:#10b981;color:white;cursor:pointer">Download PDF</button>
+    <button id="chooseUpload" style="padding:6px 10px;border:1px solid #ccc;border-radius:6px;background:#f8f9fa;cursor:pointer">ファイルを選択</button>
+    <button id="extractText" style="padding:6px 10px;border:1px solid #ccc;border-radius:6px;background:#f8f9fa;cursor:pointer">テキストを抽出</button>
+    <button id="downloadPdf" style="padding:6px 10px;border:1px solid #ccc;border-radius:6px;background:#10b981;color:white;cursor:pointer">PDFをダウンロード</button>
   </div>
   <div id="viewer"></div>
 
@@ -23,10 +23,10 @@
   <div id="textModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);align-items:center;justify-content:center;">
     <div style="background:#fff;max-width:800px;width:90%;max-height:80vh;border-radius:8px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,0.2);">
       <div style="padding:10px 14px;border-bottom:1px solid #eee;display:flex;align-items:center;justify-content:space-between;">
-        <strong>Extracted Text</strong>
+        <strong>抽出されたテキスト</strong>
         <div>
-          <button id="downloadTextBtn" style="margin-right:8px;padding:6px 10px;border:1px solid #ccc;border-radius:6px;background:#f8f9fa;cursor:pointer">Download .txt</button>
-          <button id="closeTextModal" style="padding:6px 10px;border:1px solid #ccc;border-radius:6px;background:#f8f9fa;cursor:pointer">Close</button>
+          <button id="downloadTextBtn" style="margin-right:8px;padding:6px 10px;border:1px solid #ccc;border-radius:6px;background:#f8f9fa;cursor:pointer">.txtをダウンロード</button>
+          <button id="closeTextModal" style="padding:6px 10px;border:1px solid #ccc;border-radius:6px;background:#f8f9fa;cursor:pointer">閉じる</button>
         </div>
       </div>
       <textarea id="extractedTextArea" readonly style="width:100%;height:60vh;padding:12px;border:0;outline:none;resize:none"></textarea>
@@ -50,7 +50,7 @@
       if (initialDoc) viewerConfig.initialDoc = initialDoc;
       const instance = await WebViewer(viewerConfig, document.getElementById('viewer'));
 
-      instance.UI.setLanguage('en');
+      instance.UI.setLanguage('ja');
 
       const { UI, Core } = instance;
       const { PDFNet, documentViewer } = Core;

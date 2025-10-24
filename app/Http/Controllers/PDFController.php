@@ -9,6 +9,10 @@ class PdfController extends Controller
 {
     public function editor(Request $request)
     {
+        // Clear public/pdfs directory on each editor load to avoid accumulation
+        Storage::disk('public')->deleteDirectory('pdfs');
+        Storage::disk('public')->makeDirectory('pdfs');
+
         // Load a default doc or pass ?file=/storage/pdfs/sample.pdf
         $file = $request->query('file', '');
         return view('pdf.editor', ['file' => $file]);
